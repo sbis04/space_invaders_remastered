@@ -31,11 +31,20 @@ def create_random_alien_grid(aliens, screen):
                 aliens.add(alien)
                 all_sprites.add(alien)
 
-def draw_text(surface, text, size, x, y, color=(255, 255, 255)):
-    font = pygame.font.Font(None, size)
+# def draw_text(surface, text, size, x, y, color=(255, 255, 255)):
+#     font = pygame.font.Font(None, size)
+#     text_surface = font.render(text, True, color)
+#     text_rect = text_surface.get_rect()
+#     text_rect.midtop = (x, y)
+#     surface.blit(text_surface, text_rect)
+def draw_text(surface, text, size, x, y, color=(255, 255, 255), align='center'):
+    font = pygame.font.Font("assets/fonts/Roboto-Bold.ttf", size)  # Update the font path accordingly
     text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect()
-    text_rect.midtop = (x, y)
+    if align == 'right':
+        text_rect.topright = (x, y)
+    else:
+        text_rect.midtop = (x, y)
     surface.blit(text_surface, text_rect)
 
 # Initialize sprite groups
@@ -101,8 +110,8 @@ while True:
     all_sprites.update()
     all_sprites.draw(screen)
 
-    draw_text(screen, "Score: " + str(score), 20, WIDTH // 2, 10)
-    draw_text(screen, "Lives: " + str(player.lives), 20, WIDTH // 2 + 200, 10)
+    draw_text(screen, "Score: " + str(score), 20, WIDTH - 10, 10, color=(0, 255, 0), align='right')
+    draw_text(screen, "Lives: " + str(player.lives), 20, WIDTH - 10, 30, color=(0, 255, 0), align='right')
     
     pygame.display.flip()
     clock.tick(FPS)
