@@ -31,6 +31,13 @@ def create_random_alien_grid(aliens, screen):
                 aliens.add(alien)
                 all_sprites.add(alien)
 
+def draw_text(surface, text, size, x, y, color=(255, 255, 255)):
+    font = pygame.font.Font(None, size)
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surface.blit(text_surface, text_rect)
+
 # Initialize sprite groups
 all_sprites = pygame.sprite.Group()
 aliens = pygame.sprite.Group()
@@ -45,6 +52,7 @@ all_sprites.add(player)
 create_random_alien_grid(aliens, screen)
 
 alien_shoot_cooldown = 0
+score = 0
 
 # Main game loop
 while True:
@@ -68,12 +76,17 @@ while True:
     
     # Player bullet and alien collision detection
     collisions = pygame.sprite.groupcollide(aliens, player_bullets, True, True)
+
+    for hit in collisions:
+        score += 100
     
     # Check for collisions between player and alien bullets
     player_hit = pygame.sprite.spritecollide(player, alien_bullets, True)
     if player_hit:
-        # Handle player hit, e.g., reduce lives, end the game, etc.
-        pass
+        player.lives -= 1
+        if player.lives <= 0:
+            # End the game, e.g., show "Game Over" screen, restart, etc.
+            pass
     
     # Alien shooting
     if alien_shoot_cooldown <= 0:
@@ -87,6 +100,9 @@ while True:
 
     all_sprites.update()
     all_sprites.draw(screen)
+
+    draw_text(screen, "Score: " + str(score), 20, WIDTH // 2, 10)
+    draw_text(screen, "Lives: " + str(player.lives), 20, WIDTH // 2 + 200, 10)
     
     pygame.display.flip()
     clock.tick(FPS)
