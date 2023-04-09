@@ -1,3 +1,4 @@
+import random
 import pygame
 import sys
 from src.player import Player
@@ -8,6 +9,20 @@ from src.bullet import Bullet
 WIDTH = 800
 HEIGHT = 600
 FPS = 60
+
+def create_random_alien_grid(aliens, screen):
+    alien_image_path = "assets/images/alien.png"
+    alien_rows = random.randint(3, 5)  # Choose a random number of rows between 3 and 5
+    alien_columns = random.randint(8, 12)  # Choose a random number of columns between 8 and 12
+
+    for row in range(alien_rows):
+        for column in range(alien_columns):
+            if random.random() < 0.8:  # 80% chance to spawn an alien in a grid position
+                x = 50 + column * 60
+                y = 50 + row * 60
+                alien = Alien(x, y, screen, alien_image_path)
+                aliens.add(alien)
+                all_sprites.add(alien)
 
 # Initialize Pygame
 pygame.init()
@@ -29,17 +44,10 @@ alien_spacing_x = 70
 alien_spacing_y = 60
 aliens = pygame.sprite.Group()
 
-for row in range(alien_rows):
-    for column in range(alien_columns):
-        x = 50 + column * alien_spacing_x
-        y = 50 + row * alien_spacing_y
-        image_path = 'assets/images/alien.png'
-        alien = Alien(x, y, screen, image_path)
-        aliens.add(alien)
-        all_sprites.add(alien)
-
 # Create a sprite group for bullets
 bullets = pygame.sprite.Group()
+
+create_random_alien_grid(aliens, screen)
 
 # Main game loop
 while True:
