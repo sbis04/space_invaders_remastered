@@ -1,89 +1,92 @@
-import random
 import pygame
 import sys
+import random
 from src.player import Player
 from src.alien import Alien
 from src.bullet import Bullet
+from src.alien_bullet import AlienBullet
 
 # Constants
 WIDTH = 800
 HEIGHT = 600
 FPS = 60
 
+pygame.init()
+
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Space Invaders Remastered")
+clock = pygame.time.Clock()
+
 def create_random_alien_grid(aliens, screen):
     alien_image_path = "assets/images/alien.png"
-    alien_rows = random.randint(3, 5)  # Choose a random number of rows between 3 and 5
-    alien_columns = random.randint(8, 12)  # Choose a random number of columns between 8 and 12
+    alien_rows = random.randint(3, 5)
+    alien_columns = random.randint(8, 12)
 
     for row in range(alien_rows):
         for column in range(alien_columns):
-            if random.random() < 0.8:  # 80% chance to spawn an alien in a grid position
+            if random.random() < 0.8:
                 x = 50 + column * 60
                 y = 50 + row * 60
                 alien = Alien(x, y, screen, alien_image_path)
                 aliens.add(alien)
                 all_sprites.add(alien)
 
-# Initialize Pygame
-pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-clock = pygame.time.Clock()
-
-# Set the title
-pygame.display.set_caption("Space Invaders Remastered")
-
-# Create the Player instance and add it to a sprite group
-player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen)
+# Initialize sprite groups
 all_sprites = pygame.sprite.Group()
+aliens = pygame.sprite.Group()
+player_bullets = pygame.sprite.Group()
+alien_bullets = pygame.sprite.Group()
+
+# Create player instance
+player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen)
 all_sprites.add(player)
 
-# Create a grid of aliens
-alien_rows = 5
-alien_columns = 10
-alien_spacing_x = 70
-alien_spacing_y = 60
-aliens = pygame.sprite.Group()
-
-# Create a sprite group for bullets
-bullets = pygame.sprite.Group()
-
+# Create a random grid of aliens
 create_random_alien_grid(aliens, screen)
+
+alien_shoot_cooldown = 0
 
 # Main game loop
 while True:
-    # Event handling
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                player.shoot(bullets, all_sprites)
-
-    # Get pressed keys
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
         player.move_left()
     if keys[pygame.K_RIGHT]:
         player.move_right()
 
-    # Update
-    all_sprites.update()
-
-    # Check for collisions between bullets and aliens
-    collisions = pygame.sprite.groupcollide(aliens, bullets, True, True)
-
-    # Check if any aliens have reached the bottom of the screen
-    for alien in aliens:
-        if alien.rect.bottom >= screen.get_rect().bottom:
-            # End the game or implement any other desired behavior
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                bullet = Bullet(player.rect.centerx, player.rect.top, screen)
+                all_sprites.add(bullet)
+                player_bullets.add(bullet)
 
-    # Draw
     screen.fill((0, 0, 0))
-    all_sprites.draw(screen)
+    
+    # Player bullet and alien collision detection
+    collisions = pygame.sprite.groupcollide(aliens, player_bullets, True, True)
+    
+    # Check for collisions between player and alien bullets
+    player_hit = pygame.sprite.spritecollide(player, alien_bullets, True)
+    if player_hit:
+        # Handle player hit, e.g., reduce lives, end the game, etc.
+        pass
+    
+    # Alien shooting
+    if alien_shoot_cooldown <= 0:
+        shooting_alien = random.choice(aliens.sprites())
+        alien_bullet = AlienBullet(shooting_alien.rect.centerx, shooting_alien.rect.bottom, screen)
+        all_sprites.add(alien_bullet)
+        alien_bullets.add(alien_bullet)
+        alien_shoot_cooldown = random.randint(40, 60)
+    else:
+        alien_shoot_cooldown -= 1
 
-    # Flip the display
+    all_sprites.update()
+    all_sprites.draw(screen)
+    
     pygame.display.flip()
     clock.tick(FPS)
