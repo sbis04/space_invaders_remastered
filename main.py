@@ -31,12 +31,6 @@ def create_random_alien_grid(aliens, screen):
                 aliens.add(alien)
                 all_sprites.add(alien)
 
-# def draw_text(surface, text, size, x, y, color=(255, 255, 255)):
-#     font = pygame.font.Font(None, size)
-#     text_surface = font.render(text, True, color)
-#     text_rect = text_surface.get_rect()
-#     text_rect.midtop = (x, y)
-#     surface.blit(text_surface, text_rect)
 def draw_text(surface, text, size, x, y, color=(255, 255, 255), align='center'):
     font = pygame.font.Font("assets/fonts/Roboto-Bold.ttf", size)  # Update the font path accordingly
     text_surface = font.render(text, True, color)
@@ -62,6 +56,7 @@ create_random_alien_grid(aliens, screen)
 
 alien_shoot_cooldown = 0
 score = 0
+game_over = False
 
 # Main game loop
 while True:
@@ -77,41 +72,63 @@ while True:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                bullet = Bullet(player.rect.centerx, player.rect.top, screen)
-                all_sprites.add(bullet)
-                player_bullets.add(bullet)
+                if not game_over:
+                    bullet = Bullet(player.rect.centerx, player.rect.top, screen)
+                    all_sprites.add(bullet)
+                    player_bullets.add(bullet)
+                else:
+                    # Reset the game state
+                    all_sprites.empty()
+                    aliens.empty()
+                    player_bullets.empty()
+                    alien_bullets.empty()
+
+                    player.lives = 3
+                    score = 0
+                    game_over = False
+
+                    # Create a new player instance
+                    player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen)
+                    all_sprites.add(player)
+
+                    # Create a new random grid of aliens
+                    create_random_alien_grid(aliens, screen)
 
     screen.fill((0, 0, 0))
-    
-    # Player bullet and alien collision detection
-    collisions = pygame.sprite.groupcollide(aliens, player_bullets, True, True)
 
-    for hit in collisions:
-        score += 100
-    
-    # Check for collisions between player and alien bullets
-    player_hit = pygame.sprite.spritecollide(player, alien_bullets, True)
-    if player_hit:
-        player.lives -= 1
-        if player.lives <= 0:
-            # End the game, e.g., show "Game Over" screen, restart, etc.
-            pass
-    
-    # Alien shooting
-    if alien_shoot_cooldown <= 0:
-        shooting_alien = random.choice(aliens.sprites())
-        alien_bullet = AlienBullet(shooting_alien.rect.centerx, shooting_alien.rect.bottom, screen)
-        all_sprites.add(alien_bullet)
-        alien_bullets.add(alien_bullet)
-        alien_shoot_cooldown = random.randint(40, 60)
+    if player.lives <= 0 or len(aliens) == 0:
+        game_over = True
+
+    if game_over:
+        draw_text(screen, "Game Over", 60, WIDTH // 2, HEIGHT // 2, color=(255, 0, 0))
     else:
-        alien_shoot_cooldown -= 1
+        # Player bullet and alien collision detection
+        collisions = pygame.sprite.groupcollide(aliens, player_bullets, True, True)
+        for hit in collisions:
+            score += 100
+        
+        # Check for collisions between player and alien bullets
+        player_hit = pygame.sprite.spritecollide(player, alien_bullets, True)
+        if player_hit:
+            player.lives -= 1
 
-    all_sprites.update()
-    all_sprites.draw(screen)
+        # Alien shooting
+        if alien_shoot_cooldown <= 0:
+            shooting_alien = random.choice(aliens.sprites())
+            alien_bullet = AlienBullet(shooting_alien.rect.centerx, shooting_alien.rect.bottom, screen)
+            all_sprites.add(alien_bullet)
+            alien_bullets.add(alien_bullet)
+            alien_shoot_cooldown = random.randint(40, 60)
+        else:
+            alien_shoot_cooldown -= 1
 
-    draw_text(screen, "Score: " + str(score), 20, WIDTH - 10, 10, color=(0, 255, 0), align='right')
-    draw_text(screen, "Lives: " + str(player.lives), 20, WIDTH - 10, 30, color=(0, 255, 0), align='right')
-    
+        all_sprites.update()
+        all_sprites.draw(screen)
+
+        # Display score and lives
+        draw_text(screen, "Score: " + str(score), 20, WIDTH - 10, 10, color=(0, 255, 0), align='right')
+        draw_text(screen, "Lives: " + str(player.lives), 20, WIDTH - 10, 30, color=(0, 255, 0), align='right')
+
     pygame.display.flip()
     clock.tick(FPS)
+
