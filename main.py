@@ -18,7 +18,11 @@ pygame.display.set_caption("Space Invaders Remastered")
 clock = pygame.time.Clock()
 
 def create_random_alien_grid(aliens, screen, difficulty):
-    alien_image_path = "assets/images/alien.png"
+    alien_image_paths = [
+        "assets/images/alien1.png",
+        "assets/images/alien2.png",
+        "assets/images/alien3.png",
+    ]
     alien_rows = random.randint(3, 5)
     alien_columns = random.randint(8, 12)
 
@@ -27,6 +31,11 @@ def create_random_alien_grid(aliens, screen, difficulty):
             if random.random() < 0.8:
                 x = 50 + column * 60
                 y = 50 + row * 60
+
+                # Determine the alien type based on the level
+                alien_type = min(level, len(alien_image_paths)) - 1
+                alien_image_path = alien_image_paths[alien_type]
+
                 alien = Alien(x, y, screen, alien_image_path, speed_multiplier=difficulty)
                 aliens.add(alien)
                 all_sprites.add(alien)
@@ -49,7 +58,7 @@ def reset_game():
     player_bullets.empty()
     alien_bullets.empty()
 
-    player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen)
+    player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen, 3)
     all_sprites.add(player)
 
     create_random_alien_grid(aliens, screen, level * 0.2)
@@ -66,14 +75,18 @@ def next_level():
     player_bullets.empty()
     alien_bullets.empty()
 
-    player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen)
+    lives = player.lives
+    if lives == 3:
+        lives += 1
+    elif level % 3 == 0:
+        lives = 3
+    player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen, lives)
     all_sprites.add(player)
 
     create_random_alien_grid(aliens, screen, level * 0.2)
 
     level += 1
-    if player.lives == 3:
-        player.lives += 1
+    
 
 def display_level_complete():
     draw_text(screen, "Level Complete", 60, WIDTH // 2, HEIGHT // 2 - 40, color=(255, 255, 255))
@@ -88,7 +101,7 @@ player_bullets = pygame.sprite.Group()
 alien_bullets = pygame.sprite.Group()
 
 # Create player instance
-player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen)
+player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen, 3)
 all_sprites.add(player)
 
 alien_shoot_cooldown = 0

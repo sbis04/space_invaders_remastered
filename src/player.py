@@ -2,7 +2,7 @@ import pygame
 from src.bullet import Bullet
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, screen):
+    def __init__(self, x, y, screen, lives):
         pygame.sprite.Sprite.__init__(self)
         self.x = x
         self.y = y
@@ -11,7 +11,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(image, (64, 64))  # Scale the image to the desired size (e.g., 64x64 pixels)
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        self.lives = 3
+        self.lives = lives
 
     def draw(self):
         self.screen.blit(self.image, self.rect)

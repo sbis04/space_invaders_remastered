@@ -1,4 +1,5 @@
 import pygame
+import random
 
 class Alien(pygame.sprite.Sprite):
     def __init__(self, x, y, screen, image_path, speed_multiplier=1.0):
@@ -6,8 +7,22 @@ class Alien(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.screen = screen
-        image = pygame.image.load(image_path)
-        self.image = pygame.transform.scale(image, (40, 40))  # Scale the image to the desired size (e.g., 40x40 pixels)
+        # Load the image and set its rect attribute
+        self.image = pygame.image.load(image_path).convert_alpha()
+        
+        # Scale the image while maintaining its aspect ratio
+        desired_width = 50  # Set the desired width for the alien images
+        aspect_ratio = float(self.image.get_height()) / float(self.image.get_width())
+        new_size = (desired_width, int(desired_width * aspect_ratio))
+        self.image = pygame.transform.scale(self.image, new_size)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+        # Set the alien's speed
+        self.speedx = random.choice([-1, 1]) * (2 + speed_multiplier)
+        self.speedy = random.choice([-1, 1]) * (1 + speed_multiplier)
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.speed = 2
