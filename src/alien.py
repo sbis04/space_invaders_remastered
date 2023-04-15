@@ -1,7 +1,7 @@
 import pygame
 
 class Alien(pygame.sprite.Sprite):
-    def __init__(self, x, y, screen, image_path):
+    def __init__(self, x, y, screen, image_path, speed_multiplier=1.0):
         pygame.sprite.Sprite.__init__(self)
         self.x = x
         self.y = y
@@ -11,6 +11,7 @@ class Alien(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.speed = 2
+        self.speed *= speed_multiplier
         self.direction = 1
 
     def update(self):

@@ -17,7 +17,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Invaders Remastered")
 clock = pygame.time.Clock()
 
-def create_random_alien_grid(aliens, screen):
+def create_random_alien_grid(aliens, screen, difficulty):
     alien_image_path = "assets/images/alien.png"
     alien_rows = random.randint(3, 5)
     alien_columns = random.randint(8, 12)
@@ -27,7 +27,7 @@ def create_random_alien_grid(aliens, screen):
             if random.random() < 0.8:
                 x = 50 + column * 60
                 y = 50 + row * 60
-                alien = Alien(x, y, screen, alien_image_path)
+                alien = Alien(x, y, screen, alien_image_path, speed_multiplier=difficulty)
                 aliens.add(alien)
                 all_sprites.add(alien)
 
@@ -52,7 +52,7 @@ def reset_game():
     player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen)
     all_sprites.add(player)
 
-    create_random_alien_grid(aliens, screen)
+    create_random_alien_grid(aliens, screen, level * 0.2)
 
     level = 1
     score = 0
@@ -69,7 +69,7 @@ def next_level():
     player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen)
     all_sprites.add(player)
 
-    create_random_alien_grid(aliens, screen)
+    create_random_alien_grid(aliens, screen, level * 0.2)
 
     level += 1
     if player.lives == 3:
@@ -91,12 +91,12 @@ alien_bullets = pygame.sprite.Group()
 player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen)
 all_sprites.add(player)
 
-# Create a random grid of aliens
-create_random_alien_grid(aliens, screen)
-
 alien_shoot_cooldown = 0
 score = 0
 level = 1
+
+# Create a random grid of aliens
+create_random_alien_grid(aliens, screen, level * 0.2)
 
 game_over = False
 level_complete = False
@@ -154,7 +154,7 @@ while True:
             alien_bullet = AlienBullet(shooting_alien.rect.centerx, shooting_alien.rect.bottom, screen)
             all_sprites.add(alien_bullet)
             alien_bullets.add(alien_bullet)
-            alien_shoot_cooldown = random.randint(40, 60)
+            alien_shoot_cooldown = random.randint(max(10, 60 - level * 5), max(20, 80 - level * 5))
         else:
             alien_shoot_cooldown -= 1
 
