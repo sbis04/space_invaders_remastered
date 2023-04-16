@@ -5,6 +5,7 @@ from src.player import Player
 from src.alien import Alien
 from src.bullet import Bullet
 from src.alien_bullet import AlienBullet
+from src.highscores import add_highscore, read_highscores
 
 # Constants
 WIDTH = 800
@@ -126,6 +127,7 @@ create_random_alien_grid(aliens, screen, level * 0.2)
 game_over = False
 level_complete = False
 paused = False
+player_rank = None
 
 # Main game loop
 while True:
@@ -154,7 +156,7 @@ while True:
                     all_sprites.add(bullet)
                     player_bullets.add(bullet)
                 elif game_over:
-                    # Reset the game state
+                    highscores = add_highscore(score)
                     reset_game()
                     pygame.mixer.music.play(-1, 0.0)  # Restart the background music
                 elif level_complete:
@@ -164,16 +166,33 @@ while True:
 
     screen.fill((0, 0, 0))
 
-    if player.lives <= 0:
-        if not game_over:
-            game_over_sound.play()
-            pygame.mixer.music.stop()
+    # if player.lives <= 0:
+        # if not game_over:
+        #     game_over_sound.play()
+        #     pygame.mixer.music.stop()
+        # game_over = True
+    if player.lives <= 0 and not game_over:
         game_over = True
+        highscores = add_highscore(score)
+        if score in highscores:
+            player_rank = highscores.index(score) + 1
 
     if game_over:
-        draw_text(screen, "Game Over", 60, WIDTH // 2, HEIGHT // 2 - 80, color=(255, 0, 0))
-        draw_text(screen, f"Score: {score}", 40, WIDTH // 2, HEIGHT // 2, color=(255, 255, 255))
-        draw_text(screen, "Press SPACE to start new game", 16, WIDTH // 2, HEIGHT // 2 + 80, color=(180, 180, 180))
+        highscores = read_highscores()
+        number_of_highscores = len(highscores)
+        draw_text(screen, "Game Over", 60, WIDTH // 2, HEIGHT // 2 - 140, color=(255, 0, 0))
+        draw_text(screen, f"Score: {score}", 40, WIDTH // 2, HEIGHT // 2 - 60, color=(255, 255, 255))
+        if number_of_highscores > 0:
+            draw_text(screen, "High Scores", 24, WIDTH // 2, HEIGHT // 2, color=(200, 200, 200))
+            for i, hs in enumerate(highscores):
+                y = HEIGHT // 2 + 40 + i * 20
+                text = f"{i+1}. {hs}"
+                color = (200, 200, 200) if hs != score else (255, 255, 0)
+                draw_text(screen, text, 16, WIDTH // 2, y, color=color)
+            if score in highscores:
+                rank = highscores.index(score) + 1
+                draw_text(screen, f"Your rank: {rank}", 20, WIDTH // 2, HEIGHT // 2 + 70 + (number_of_highscores - 1) * 20, color=(255, 255, 255))
+        draw_text(screen, "Press SPACE to start new game", 16, WIDTH // 2, HEIGHT // 2 + 140 + (number_of_highscores - 1) * 20, color=(180, 180, 180))
     elif paused:
         draw_text(screen, "Paused", 60, WIDTH // 2, HEIGHT // 2 - 80, color=(255, 196, 0))
         draw_text(screen, "Press SPACE to resume", 16, WIDTH // 2, HEIGHT // 2 + 30, color=(180, 180, 180))

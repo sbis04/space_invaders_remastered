@@ -1,3 +1,5 @@
 src/__pycache__/alien.cpython-38.pyc
 src/__pycache__/bullet.cpython-38.pyc
 src/__pycache__/player.cpython-38.pyc
+highscores.txt
+src/__pycache__/highscores.cpython-38.pyc
