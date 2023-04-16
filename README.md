@@ -1,6 +1,42 @@
 # Space Invaders Remastered
 
-Built using Python and Pygames.
+Space Invaders Remastered is a modern take on the classic arcade game Space Invaders, created using Python and Pygame. In this game, players control a spaceship and must shoot down waves of aliens while avoiding their projectiles.
+
+![Game Screenshot](assets/screenshots/game_screenshot.png)
+
+## Features
+
+- Randomly generated alien grids with increasing difficulty
+- Different types of aliens
+- Sound effects and background music
+- Level progression system
+- Player lives and scoring system
+- Game over and level complete screens
+- Pause menu with options to resume or quit the game
+
+## How to Run
+
+1. Ensure you have Python 3.7 or later installed on your system. You can download Python from the [official website](https://www.python.org/downloads/).
+
+2. Install the required dependencies:
+    ```
+    pip install -r requirements.txt
+    ```
+
+3. Run the game using the following command:
+    ```
+    python main.py
+    ```
+
+
+## Future Suggestions
+
+- Add power-ups for the player (e.g., shield, rapid fire, extra life)
+- Implement boss battles at certain levels
+- Integrate a high score system with an online leaderboard
+- Add more diverse alien types and behaviors
+- Include a settings menu to configure game options (e.g., sound levels, difficulty, controls)
+
 
 ### License
 
