@@ -1,3 +1,4 @@
+import os
 import pygame
 import sys
 import random
@@ -6,6 +7,7 @@ from src.alien import Alien
 from src.bullet import Bullet
 from src.alien_bullet import AlienBullet
 from src.highscores import add_highscore, read_highscores
+from src.explosion import Explosion
 
 # Constants
 WIDTH = 800
@@ -29,6 +31,26 @@ alien_shoot_sound = pygame.mixer.Sound("assets/sounds/alien_shoot.wav")
 alien_hit_sound = pygame.mixer.Sound("assets/sounds/alien_hit.wav")
 player_hit_sound = pygame.mixer.Sound("assets/sounds/player_hit.wav")
 game_over_sound = pygame.mixer.Sound("assets/sounds/game_over.wav")
+
+def load_scaled_background(image_path, width, height):
+    img = pygame.image.load(image_path)
+    img_width, img_height = img.get_size()
+
+    scale = max(width / img_width, height / img_height)
+    new_width = int(img_width * scale)
+    new_height = int(img_height * scale)
+
+    img = pygame.transform.scale(img, (new_width, new_height))
+
+    return img
+
+background_images = [
+    load_scaled_background(os.path.join("assets", "images", "background1.jpg"), WIDTH, HEIGHT),
+    load_scaled_background(os.path.join("assets", "images", "background2.jpg"), WIDTH, HEIGHT),
+    load_scaled_background(os.path.join("assets", "images", "background3.jpg"), WIDTH, HEIGHT),
+    load_scaled_background(os.path.join("assets", "images", "background4.jpg"), WIDTH, HEIGHT),
+    load_scaled_background(os.path.join("assets", "images", "background5.jpg"), WIDTH, HEIGHT)
+]
 
 def create_random_alien_grid(aliens, screen, difficulty):
     alien_image_paths = [
@@ -81,7 +103,7 @@ def reset_game():
     game_over = False
 
 def next_level():
-    global all_sprites, aliens, player_bullets, alien_bullets, player, level
+    global all_sprites, aliens, player_bullets, alien_bullets, player, level, background_image_index
 
     all_sprites.empty()
     aliens.empty()
@@ -99,6 +121,7 @@ def next_level():
     create_random_alien_grid(aliens, screen, level * 0.2)
 
     level += 1
+    background_image_index = (background_image_index + 1) % len(background_images)
     
 
 def display_level_complete():
@@ -118,6 +141,7 @@ player = Player(WIDTH // 2 - 32, HEIGHT - 100, screen, 3)
 all_sprites.add(player)
 
 alien_shoot_cooldown = 0
+background_image_index = 0
 score = 0
 level = 1
 
@@ -129,13 +153,19 @@ level_complete = False
 paused = False
 player_rank = None
 
+black_overlay = pygame.Surface((WIDTH, HEIGHT))
+black_overlay.set_alpha(102)  # 40% opacity (255 * 0.4 = 102)
+black_overlay.fill((0, 0, 0))
+
 # Main game loop
 while True:
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
         player.move_left()
-    if keys[pygame.K_RIGHT]:
+    elif keys[pygame.K_RIGHT]:
         player.move_right()
+    else:
+        player.reset_tilt()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -164,7 +194,11 @@ while True:
                     next_level()
                     pygame.mixer.music.set_volume(0.4)
 
-    screen.fill((0, 0, 0))
+    bg_img = background_images[background_image_index]
+    bg_x = (WIDTH - bg_img.get_width()) // 2
+    bg_y = (HEIGHT - bg_img.get_height()) // 2
+    screen.blit(bg_img, (bg_x, bg_y))
+    screen.blit(black_overlay, (0, 0))
 
     # if player.lives <= 0:
         # if not game_over:
@@ -212,6 +246,8 @@ while True:
         for hit in collisions:
             alien_hit_sound.play()
             score += 100
+            explosion = Explosion(hit.rect.centerx, hit.rect.centery, screen)
+            all_sprites.add(explosion)
         
         # Check for collisions between player and alien bullets
         player_hit = pygame.sprite.spritecollide(player, alien_bullets, True)
