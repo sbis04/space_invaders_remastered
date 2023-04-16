@@ -45,7 +45,7 @@ Space Invaders Remastered is a modern take on the classic arcade game Space Inva
 - Include a settings menu to configure game options (e.g., sound levels, difficulty, controls)
 
 
-### License
+## License
 
 Copyright (c) 2023 Souvik Biswas
 
