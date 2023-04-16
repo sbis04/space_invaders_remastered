@@ -11,7 +11,6 @@ class Player(pygame.sprite.Sprite):
         sizedImage = pygame.transform.scale(image, (64, 64))
         self.original_image = sizedImage.convert_alpha()
         self.image = self.original_image.copy()
-        # self.image = pygame.transform.scale(image, (64, 64))  # Scale the image to the desired size (e.g., 64x64 pixels)
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.lives = lives

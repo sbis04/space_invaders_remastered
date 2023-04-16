@@ -200,11 +200,6 @@ while True:
     screen.blit(bg_img, (bg_x, bg_y))
     screen.blit(black_overlay, (0, 0))
 
-    # if player.lives <= 0:
-        # if not game_over:
-        #     game_over_sound.play()
-        #     pygame.mixer.music.stop()
-        # game_over = True
     if player.lives <= 0 and not game_over:
         game_over = True
         highscores = add_highscore(score)
