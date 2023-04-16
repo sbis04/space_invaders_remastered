@@ -28,6 +28,13 @@ Space Invaders Remastered is a modern take on the classic arcade game Space Inva
     python main.py
     ```
 
+## How to Play
+
+- Use the left and right arrow keys to move your spaceship horizontally.
+- Press the spacebar to shoot bullets at the aliens.
+- Clear all aliens to complete a level and proceed to the next level.
+- The game ends when you run out of lives or if you choose to quit from the pause menu.
+- Press "Escape" to pause the game, and press "Spacebar" to resume or "Escape" again to quit.
 
 ## Future Suggestions
 
