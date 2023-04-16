@@ -17,6 +17,18 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Invaders Remastered")
 clock = pygame.time.Clock()
 
+pygame.mixer.init()
+pygame.mixer.music.load("assets/sounds/background_music.ogg")
+pygame.mixer.music.set_volume(0.4)
+pygame.mixer.music.play(-1)  # Loop indefinitely
+
+# Load sound effects
+player_shoot_sound = pygame.mixer.Sound("assets/sounds/player_shoot.wav")
+alien_shoot_sound = pygame.mixer.Sound("assets/sounds/alien_shoot.wav")
+alien_hit_sound = pygame.mixer.Sound("assets/sounds/alien_hit.wav")
+player_hit_sound = pygame.mixer.Sound("assets/sounds/player_hit.wav")
+game_over_sound = pygame.mixer.Sound("assets/sounds/game_over.wav")
+
 def create_random_alien_grid(aliens, screen, difficulty):
     alien_image_paths = [
         "assets/images/alien1.png",
@@ -113,6 +125,7 @@ create_random_alien_grid(aliens, screen, level * 0.2)
 
 game_over = False
 level_complete = False
+paused = False
 
 # Main game loop
 while True:
@@ -127,42 +140,69 @@ while True:
             pygame.quit()
             sys.exit()
         elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                if not paused:
+                    paused = True
+                    pygame.mixer.music.set_volume(0.2)
+                else:
+                    pygame.quit()
+                    sys.exit()
             if event.key == pygame.K_SPACE:
                 if not game_over and not level_complete:
+                    player_shoot_sound.play()
                     bullet = Bullet(player.rect.centerx, player.rect.top, screen)
                     all_sprites.add(bullet)
                     player_bullets.add(bullet)
                 elif game_over:
                     # Reset the game state
                     reset_game()
+                    pygame.mixer.music.play(-1, 0.0)  # Restart the background music
                 elif level_complete:
                     level_complete = False
                     next_level()
+                    pygame.mixer.music.set_volume(0.4)
 
     screen.fill((0, 0, 0))
 
     if player.lives <= 0:
+        if not game_over:
+            game_over_sound.play()
+            pygame.mixer.music.stop()
         game_over = True
 
     if game_over:
-        draw_text(screen, "Game Over", 60, WIDTH // 2, HEIGHT // 2, color=(255, 0, 0))
+        draw_text(screen, "Game Over", 60, WIDTH // 2, HEIGHT // 2 - 80, color=(255, 0, 0))
+        draw_text(screen, f"Score: {score}", 40, WIDTH // 2, HEIGHT // 2, color=(255, 255, 255))
+        draw_text(screen, "Press SPACE to start new game", 16, WIDTH // 2, HEIGHT // 2 + 80, color=(180, 180, 180))
+    elif paused:
+        draw_text(screen, "Paused", 60, WIDTH // 2, HEIGHT // 2 - 80, color=(255, 196, 0))
+        draw_text(screen, "Press SPACE to resume", 16, WIDTH // 2, HEIGHT // 2 + 30, color=(180, 180, 180))
+        draw_text(screen, "Press ESC to quit", 16, WIDTH // 2, HEIGHT // 2 + 60, color=(180, 180, 180))
+        if keys[pygame.K_SPACE]:
+            paused = False
+            pygame.mixer.music.set_volume(0.4)
     elif len(aliens) == 0:
         level_complete = True
-        draw_text(screen, "Level " + str(level) + " Complete", 60, WIDTH // 2, HEIGHT // 2, color=(0, 255, 0))
-        draw_text(screen, "Press SPACE to continue", 30, WIDTH // 2, HEIGHT // 2 + 60, color=(255, 255, 255))
+        pygame.mixer.music.set_volume(0.2)
+        draw_text(screen, "Level " + str(level) + " Complete", 60, WIDTH // 2, HEIGHT // 2 - 80, color=(0, 255, 0))
+        draw_text(screen, f"Score: {score}", 40, WIDTH // 2, HEIGHT // 2, color=(255, 255, 255))
+        draw_text(screen, "Press SPACE to continue", 16, WIDTH // 2, HEIGHT // 2 + 80, color=(180, 180, 180))
     else:
         # Player bullet and alien collision detection
         collisions = pygame.sprite.groupcollide(aliens, player_bullets, True, True)
         for hit in collisions:
+            alien_hit_sound.play()
             score += 100
         
         # Check for collisions between player and alien bullets
         player_hit = pygame.sprite.spritecollide(player, alien_bullets, True)
         if player_hit:
+            player_hit_sound.play()
             player.lives -= 1
 
         # Alien shooting
         if alien_shoot_cooldown <= 0:
+            alien_shoot_sound.play()
             shooting_alien = random.choice(aliens.sprites())
             alien_bullet = AlienBullet(shooting_alien.rect.centerx, shooting_alien.rect.bottom, screen)
             all_sprites.add(alien_bullet)
