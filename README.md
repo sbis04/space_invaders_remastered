@@ -1,4 +1,4 @@
-# Space Invaders Remastered Game
+# Space Invaders Remastered
 
 Built using Python and Pygames.
 
