@@ -2,7 +2,7 @@
 
 Space Invaders Remastered is a modern take on the classic arcade game Space Invaders, created using Python and Pygame. In this game, players control a spaceship and must shoot down waves of aliens while avoiding their projectiles.
 
-![Gameplay](https://user-images.githubusercontent.com/43280874/232664994-0fdf2441-fd45-4f4e-bc38-6af965cca56b.gif)
+![Gameplay](assets/screenshots/game_2.gif)
 
 ## Features
 
